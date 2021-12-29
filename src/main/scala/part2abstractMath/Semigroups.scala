@@ -29,12 +29,21 @@ object Semigroups {
 
   // TODO 1: support a new type
   // hint: use the same patter we use with Eq
-  case class Expense(id: Long, amount: Double)
+  case class Expense(id: Long, amount: BigDecimal)
 
   implicit val expenseSemigroup: Semigroup[Expense] =
     Semigroup.instance[Expense] {
       (a, b) => Expense(Math.max(a.id, b.id), a.amount + b.amount)
     }
+
+  // extension methods from Semigroup - |+|
+  import cats.syntax.semigroup._
+  val intSum: Int = 2 |+| 3 // requires the presence of an implicit Semigroup[Int]
+  val aStringConcat: String = "Me Like " |+| "Semigroups"
+  val aExpenseComb: Expense = Expense(5, 35) |+| Expense(8, 45)
+
+  // TODO 2 : implement reduceThings2
+  def reduceThings2[T](list: List[T])(implicit semigroup: Semigroup[T]): T = ???
 
   def main(args: Array[String]): Unit = {
     println(intCombination)
