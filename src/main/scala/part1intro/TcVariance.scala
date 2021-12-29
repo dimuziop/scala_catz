@@ -14,7 +14,7 @@ object TcVariance {
   import cats.syntax.eq._
   Eq
 
-  val aComparison = Option(2) === Option(3)
+  val aComparison: Boolean = Option(2) === Option(3)
   //val anInvalidComparison = Some(2) === None // Eq[Some[Int]] not found
 
   // variance
