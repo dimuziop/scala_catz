@@ -43,7 +43,11 @@ object Semigroups {
   val aExpenseComb: Expense = Expense(5, 35) |+| Expense(8, 45)
 
   // TODO 2 : implement reduceThings2
-  def reduceThings2[T](list: List[T])(implicit semigroup: Semigroup[T]): T = ???
+  def reduceThings2[T](list: List[T])(implicit semigroup: Semigroup[T]): T =
+    list.reduce(_ |+| _)
+
+  def reduceThings3[T: Semigroup](list: List[T]): T = // look the implicit syntax here
+    list.reduce(_ |+| _)
 
   def main(args: Array[String]): Unit = {
     println(intCombination)
