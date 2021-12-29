@@ -33,8 +33,7 @@ object Semigroups {
 
   implicit val expenseSemigroup: Semigroup[Expense] =
     Semigroup.instance[Expense] {
-      val r = scala.util.Random
-      (a, b) => Expense(r.nextLong(), a.amount + b.amount)
+      (a, b) => Expense(Math.max(a.id, b.id), a.amount + b.amount)
     }
 
   def main(args: Array[String]): Unit = {
