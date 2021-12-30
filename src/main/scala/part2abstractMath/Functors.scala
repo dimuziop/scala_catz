@@ -52,6 +52,14 @@ object Functors {
   // hint: define an object which extends Functor[Tree]
   trait Tree[+T]
 
+  object Tree {
+    /* Smart constructors */
+    def leaf[T](value: T): Tree[T] = Leaf(value)
+
+    def branch[T](value: T, left: Tree[T], right: Tree[T]): Tree[T] =
+      Branch(value, left, right)
+  }
+
   case class Leaf[+T](value: T) extends Tree[T]
 
   case class Branch[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T]
@@ -59,9 +67,16 @@ object Functors {
   implicit object TreeFunctor extends Functor[Tree] {
     override def map[A, B](fa: Tree[A])(f: A => B): Tree[B] = fa match {
       case Leaf(v) => Leaf(f(v))
-      case Branch(v,l,r) => Branch(f(v), map(l)(f), map(r)(f))
+      case Branch(v, l, r) => Branch(f(v), map(l)(f), map(r)(f))
     }
   }
+
+  // extension method - map
+  import cats.syntax.functor._
+  val tree: Tree[Int]= Tree.branch(40, Tree.branch(5, Tree.leaf(5), Tree.leaf(5)), Tree.leaf(43))
+  tree.map(_ + 1)
+
+  // TODO 2 write a shorted do10x method using extension methods
 
   def main(args: Array[String]): Unit = {
     println(do10X(List(1, 2, 3)))
@@ -69,6 +84,7 @@ object Functors {
     println(do10X(Try(5)))
     //println(do10X(Branch(30, Leaf(10), Leaf(50)))) || invariance error
     println(do10X[Tree](Branch(30, Leaf(10), Leaf(50))))
+    println(do10X(Tree.branch(30, Tree.leaf(10), Tree.leaf(50))))
   }
 
 }
