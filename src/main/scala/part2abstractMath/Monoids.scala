@@ -43,8 +43,30 @@ object Monoids {
   def combineFold[T](list: List[T])(implicit monoid: Monoid[T]): T =
     list.foldLeft(monoid.empty)(_ |+| _)
 
+  // TODO2: combine a list of phonebooks as Map[String, Int]
+  // hint don't construct your own monoid, import it
+  val phonebooks = List(
+    Map(
+      "Gary" -> 456,
+      "Jeff" -> 6556,
+      "Tina" -> 8475
+    ),
+    Map(
+      "Mia" -> 584,
+      "Carl" -> 566
+    ),
+    Map(
+      "Lisa" -> 564,
+      "Luke" -> 789
+    )
+  )
+
+  import cats.instances.map._
+
   def main(args: Array[String]): Unit = {
     println(sumLeft == sumRight)
+    println(combineFold(numbers))
+    println(combineFold(phonebooks))
   }
 
 }
