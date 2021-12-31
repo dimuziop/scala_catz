@@ -12,7 +12,11 @@ object Monads {
   val charsList = List('a', 'b', 'c')
 
   // TODO 1.1 how do you create all combination of (number, char)?
-  val combination1Point1: List[(Int, Char)] = numbersList.flatMap(n => charsList.map(b => (n, b)))
+  val combination1Point1: List[(Int, Char)] = numbersList.flatMap(n => charsList.map(c => (n, c)))
+  val combinationLstFor: List[(Int, Char)] = for {
+    n <- numbersList
+    c <- charsList
+  } yield (n, c)
 
 
   def main(args: Array[String]): Unit = {
