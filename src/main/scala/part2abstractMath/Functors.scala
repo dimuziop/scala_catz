@@ -77,6 +77,8 @@ object Functors {
   tree.map(_ + 1)
 
   // TODO 2 write a shorted do10x method using extension methods
+  // def do10xS[F[_]](container: F[Int])(implicit functor: Functor[F]): F[Int] = container.map(_ * 10)
+  def do10xS[F[_]: Functor](container: F[Int]): F[Int] = container.map(_ * 10)
 
   def main(args: Array[String]): Unit = {
     println(do10X(List(1, 2, 3)))
@@ -84,7 +86,7 @@ object Functors {
     println(do10X(Try(5)))
     //println(do10X(Branch(30, Leaf(10), Leaf(50)))) || invariance error
     println(do10X[Tree](Branch(30, Leaf(10), Leaf(50))))
-    println(do10X(Tree.branch(30, Tree.leaf(10), Tree.leaf(50))))
+    println(do10xS(Tree.branch(30, Tree.leaf(10), Tree.leaf(50))))
   }
 
 }
