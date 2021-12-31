@@ -80,10 +80,29 @@ object Monads {
   val aFuture: Future[Int] = futureMonad.pure(5)
   val aTransformedFuture: Future[Int] = futureMonad.flatMap(aFuture)(x => Future(x * 25))
 
+  // specialized API
+  def getPairsList(numbers: List[Int], chars: List[Char]): List[(Int, Char)] =
+    numbers.flatMap(n => chars.map(c => (n, c)))
+
+  def getPairsOption(number: Option[Int], char: Option[Char]): Option[(Int, Char)] =
+    number.flatMap(n => char.map(c => (n, c)))
+
+  def getPairsFuture(number: Future[Int], char: Future[Char]): Future[(Int, Char)] =
+    number.flatMap(n => char.map(c => (n, c)))
+
+  // generalize
+  def getPairs[M[_], A, B](ma: M[A], mb: M[B])(implicit monad: Monad[M]): M[(A, B)] =
+    monad.flatMap(ma)(a => monad.map(mb)(b => (a, b)))
+
+
+
   def main(args: Array[String]): Unit = {
     println(combination1Point1)
     println(combinationOption)
     println(combinationFuture)
+    println(getPairs(numbersList, charsList))
+    println(getPairs(numberOption, charOption))
+    getPairs(numberFuture, charFuture).foreach(println)
   }
 
 }
