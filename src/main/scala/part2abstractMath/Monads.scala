@@ -1,5 +1,8 @@
 package part2abstractMath
 
+import java.util.concurrent.Executors
+import scala.concurrent.{ExecutionContext, Future}
+
 /**
  * User: pat
  * Date: 31/12/21
@@ -28,10 +31,21 @@ object Monads {
     c <- charOption
   } yield (n, c)
 
+  // future
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
+  val numberFuture: Future[Int] = Future(42)
+  val charFuture: Future[Char] = Future('a')
+  // TODO 1.3 how do you create all combination of (number, char)?
+  val combinationFuture: Future[(Int, Char)] = numberFuture.flatMap(n => charFuture.map(c => (n,c)))
+  val combinationFutureFor: Future[(Int, Char)] = for {
+    n <- numberFuture
+    c <- charFuture
+  } yield (n, c)
 
   def main(args: Array[String]): Unit = {
     println(combination1Point1)
     println(combinationOption)
+    println(combinationFuture)
   }
 
 }
