@@ -105,6 +105,24 @@ object Monads {
   val oneOptionTransformed: Option[Int] = oneOption.flatMap(x => (x + 1).pure[Option])
 
   // TODO 3: implement the map method in MyMonad
+  // Monads extends Functors
+  val oneOptionMapped: Option[Int] = Monad[Option].map(Option(2))(_ + 1)
+  import cats.syntax.functor._ // map is here
+  val oneOptionMapped2: Option[Int] = oneOption.map(_ + 2)
+
+  // for-comprehesions
+  val composedOptionFor: Option[Int] = for {
+    one <- 1.pure[Option]
+    two <- 2.pure[Option]
+  } yield one + two
+
+  // TODO 4: implement a shorter version of getPairs using for-comprehensions
+
+  def getPairsShorter[M[_]: Monad, A, B](ma: M[A], mb: M[B]): M[(A, B)] =
+    for {
+      a <- ma.pure[M]
+      b <- mb.pure[M]
+    } yield (a, b)
 
 
   def main(args: Array[String]): Unit = {
