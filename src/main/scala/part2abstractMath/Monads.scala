@@ -55,6 +55,9 @@ object Monads {
     def pure[A](value: A): M[A]
 
     def flatMap[A, B](ma: M[A])(f: A => M[B]): M[B]
+
+    //TODO: implement this
+    def map[A, B](ma: M[A])(f: A => B): M[B] = flatMap(ma)(a => pure(f(a)))
   }
 
   // Cats monad
@@ -94,6 +97,14 @@ object Monads {
   def getPairs[M[_], A, B](ma: M[A], mb: M[B])(implicit monad: Monad[M]): M[(A, B)] =
     monad.flatMap(ma)(a => monad.map(mb)(b => (a, b)))
 
+  // extension methods - weirder imports - pure, flatMap
+  import cats.syntax.applicative._
+  val oneOption: Option[Int] = 1.pure[Option] // implicit Monad[Option] will be use => Some(1)
+
+  import cats.syntax.flatMap._ // flatmap isHere
+  val oneOptionTransformed: Option[Int] = oneOption.flatMap(x => (x + 1).pure[Option])
+
+  // TODO 3: implement the map method in MyMonad
 
 
   def main(args: Array[String]): Unit = {
