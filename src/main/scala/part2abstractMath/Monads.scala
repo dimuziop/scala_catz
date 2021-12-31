@@ -118,10 +118,13 @@ object Monads {
 
   // TODO 4: implement a shorter version of getPairs using for-comprehensions
 
-  def getPairsShorter[M[_]: Monad, A, B](ma: M[A], mb: M[B]): M[(A, B)] =
+  def getPairsForShorter[M[_]: Monad, A, B](ma: M[A], mb: M[B]): M[(A, B)] =
+    ma.flatMap(a => mb.map(b => (a, b)))
+
+  def getPairsFor[M[_]: Monad, A, B](ma: M[A], mb: M[B]): M[(A, B)] =
     for {
-      a <- ma.pure[M]
-      b <- mb.pure[M]
+      a <- ma
+      b <- mb
     } yield (a, b)
 
 
@@ -132,6 +135,7 @@ object Monads {
     println(getPairs(numbersList, charsList))
     println(getPairs(numberOption, charOption))
     getPairs(numberFuture, charFuture).foreach(println)
+    println(getPairsForShorter(numbersList, charsList))
   }
 
 }
