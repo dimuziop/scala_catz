@@ -55,7 +55,7 @@ object UsingMonads {
   case class Connection(host: String, port: String)
   val config = Map(
     "host" -> "localhost",
-    "port" -> 4040
+    "port" -> "4040"
   )
 
   trait HttpService[M[_]] {
@@ -73,6 +73,29 @@ object UsingMonads {
       otherwise the method will fail, according to the logic of the type M
     TODO: provide a real implementation of HttpService using Try, Option, Future, Either
    */
+
+  object OptionalHttpService extends HttpService[Option] {
+    override def getConnection(cfg: Map[String, String]): Option[Connection] =
+      for {
+        host <- cfg.get("host")
+        port <- cfg.get("port")
+      } yield Connection(host, port)
+
+    override def issueRequest(connection: Connection, payload: String): Option[String] =
+      if (payload.length < 20) None
+      else Some(s"request ${payload} has been accepted")
+  }
+
+  val responseOption: Option[String] = OptionalHttpService.getConnection(config).flatMap {
+    connection => OptionalHttpService.issueRequest(connection, "Hello, message")
+  }
+
+  val responseOptionFor: Option[String] = for {
+    conn <- OptionalHttpService.getConnection(config)
+    res <- OptionalHttpService.issueRequest(conn, "Hello, for message")
+  } yield res
+
+
 
   def main(args: Array[String]): Unit = {
 
