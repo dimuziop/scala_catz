@@ -73,6 +73,12 @@ object UsingMonads {
     def issueRequest(connection: Connection, payload: String): M[String]
   }
 
+  def getResponse[M[_]](service: HttpService[M], payload: String)(implicit monad: Monad[M]): M[String] =
+    for {
+      conn <- service.getConnection(config)
+      response <- service.issueRequest(conn, payload)
+    } yield response
+
 
   /*
     Requirements:
@@ -167,6 +173,9 @@ object UsingMonads {
     println(responseCustom)
     println(responseOptionCustom)
     println(responseCustomError)
+    import cats.instances.option._
+    println(getResponse(OptionalHttpService, "Hello Option"))
+    println(getResponse(CustomMonadHttpServer, "Hello Option"))
 
   }
 
