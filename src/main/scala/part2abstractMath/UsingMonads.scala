@@ -1,5 +1,7 @@
 package part2abstractMath
 
+import scala.util.{Failure, Success, Try}
+
 /**
  * User: pat
  * Date: 3/1/22
@@ -95,7 +97,25 @@ object UsingMonads {
     res <- OptionalHttpService.issueRequest(conn, "Hello, for message")
   } yield res
 
+  object TryHttpService extends HttpService[Try] {
+    override def getConnection(cfg: Map[String, String]): Try[Connection] =
+      for {
+        host <- Try(cfg("host"))
+        port <- Try(cfg("port"))
+      } yield Connection(host, port)
 
+    override def issueRequest(connection: Connection, payload: String): Try[String] =
+      if (payload.length < 20) Failure(new IllegalArgumentException)
+      else Success(s"request ${payload} has been accepted")
+  }
+
+  val responseTry: Try[String] = TryHttpService.getConnection(config)
+    .flatMap(conn => TryHttpService.issueRequest(conn, "Hello, for TRY message"))
+
+  val responseOptionTry: Try[String] = for {
+    conn <- TryHttpService.getConnection(config)
+    res <- TryHttpService.issueRequest(conn, "Hello, for message")
+  } yield res
 
   def main(args: Array[String]): Unit = {
 
