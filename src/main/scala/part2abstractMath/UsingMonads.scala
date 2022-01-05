@@ -28,13 +28,14 @@ object UsingMonads {
 
   val loadingMonad: Monad[LoadingOr] = Monad[LoadingOr]
   val anEither: LoadingOr[Int] = loadingMonad.pure(42)
-  val aChangedLoading = loadingMonad.flatMap(anEither)(n => if (n%2 == 0) Right(n + 1) else Left("Loading a message...."))
+  val aChangedLoading = loadingMonad.flatMap(anEither)(n => if (n % 2 == 0) Right(n + 1) else Left("Loading a message...."))
 
   // imaginary online store
 
   case class OrderStatus(orderId: Long, status: String)
 
   def getOrderStatus(orderId: Long): LoadingOr[OrderStatus] = Right(OrderStatus(orderId, "Ready to ship"))
+
   def trackLocation(orderStatus: OrderStatus): LoadingOr[String] =
     if (orderStatus.orderId > 1000) Left("Not available yer, refreshing data....")
     else Right("Amsterdam, NL")
@@ -43,6 +44,7 @@ object UsingMonads {
   val orderLocation: LoadingOr[String] = loadingMonad.flatMap(getOrderStatus(orderId))(orderStatus => trackLocation(orderStatus))
 
   // use cats extension methods
+
   import cats.syntax.flatMap._
   import cats.syntax.functor._
 
@@ -55,6 +57,7 @@ object UsingMonads {
 
   // TODO: the service layer API of a web App
   case class Connection(host: String, port: String)
+
   val config = Map(
     "host" -> "localhost",
     "port" -> "4040"
@@ -62,6 +65,7 @@ object UsingMonads {
 
   trait HttpService[M[_]] {
     def getConnection(cfg: Map[String, String]): M[Connection]
+
     def issueRequest(connection: Connection, payload: String): M[String]
   }
 
@@ -84,7 +88,7 @@ object UsingMonads {
       } yield Connection(host, port)
 
     override def issueRequest(connection: Connection, payload: String): Option[String] =
-      if (payload.length < 20) None
+      if (payload.length >= 20) None
       else Some(s"request ${payload} has been accepted")
   }
 
@@ -105,19 +109,47 @@ object UsingMonads {
       } yield Connection(host, port)
 
     override def issueRequest(connection: Connection, payload: String): Try[String] =
-      if (payload.length < 20) Failure(new IllegalArgumentException)
+      if (payload.length >= 20) Failure(new IllegalArgumentException)
       else Success(s"request ${payload} has been accepted")
   }
 
-  val responseTry: Try[String] = TryHttpService.getConnection(config)
-    .flatMap(conn => TryHttpService.issueRequest(conn, "Hello, for TRY message"))
+  val responseTry: Try[String] = TryHttpService getConnection (config) flatMap {
+    conn => TryHttpService.issueRequest(conn, "Hello, for message")
+  }
 
   val responseOptionTry: Try[String] = for {
     conn <- TryHttpService.getConnection(config)
     res <- TryHttpService.issueRequest(conn, "Hello, for message")
   } yield res
 
+  // TODO implement another HttpService with LoadingOr or ErrorOr
+
+  object CustomMonadHttpServer extends HttpService[ErrorOr] {
+    override def getConnection(cfg: Map[String, String]): ErrorOr[Connection] =
+      for {
+        host <- Right(cfg("host"))
+        port <- Right(cfg("port"))
+      } yield Connection(host, port)
+
+    override def issueRequest(connection: Connection, payload: String): ErrorOr[String] =
+      if (payload.length >= 20) Left(new IllegalArgumentException)
+      else Right(s"request ${payload} has been accepted")
+  }
+
+  val responseCustom: ErrorOr[String] = CustomMonadHttpServer getConnection (config) flatMap {
+    conn => CustomMonadHttpServer.issueRequest(conn, "Hello, for message")
+  }
+
+  val responseOptionCustom: ErrorOr[String] = for {
+    conn <- CustomMonadHttpServer.getConnection(config)
+    res <- CustomMonadHttpServer.issueRequest(conn, "Hello, for message")
+  } yield res
+
   def main(args: Array[String]): Unit = {
+    println(responseTry)
+    println(responseOption)
+    println(responseCustom)
+    println(responseOptionCustom)
 
   }
 
