@@ -63,6 +63,10 @@ object UsingMonads {
     "port" -> "4040"
   )
 
+  val wrongConfig = Map(
+    "host" -> "localhost"
+  )
+
   trait HttpService[M[_]] {
     def getConnection(cfg: Map[String, String]): M[Connection]
 
@@ -126,10 +130,18 @@ object UsingMonads {
 
   object CustomMonadHttpServer extends HttpService[ErrorOr] {
     override def getConnection(cfg: Map[String, String]): ErrorOr[Connection] =
-      for {
+      /*for {
         host <- Right(cfg("host"))
         port <- Right(cfg("port"))
-      } yield Connection(host, port)
+      } yield Connection(host, port)*/
+      /// BE CAREFUL
+    {
+      if (!cfg.contains("host") || !cfg.contains("port")) {
+        Left(new IllegalArgumentException)
+      } else {
+        Right(Connection(cfg("host"), cfg("port")))
+      }
+    }
 
     override def issueRequest(connection: Connection, payload: String): ErrorOr[String] =
       if (payload.length >= 20) Left(new IllegalArgumentException)
@@ -137,6 +149,10 @@ object UsingMonads {
   }
 
   val responseCustom: ErrorOr[String] = CustomMonadHttpServer getConnection (config) flatMap {
+    conn => CustomMonadHttpServer.issueRequest(conn, "Hello, for message")
+  }
+
+  val responseCustomError: ErrorOr[String] = CustomMonadHttpServer getConnection wrongConfig flatMap {
     conn => CustomMonadHttpServer.issueRequest(conn, "Hello, for message")
   }
 
@@ -150,6 +166,7 @@ object UsingMonads {
     println(responseOption)
     println(responseCustom)
     println(responseOptionCustom)
+    println(responseCustomError)
 
   }
 
