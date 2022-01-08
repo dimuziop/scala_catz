@@ -68,7 +68,8 @@ object MonadTransformers {
   def generateTrafficSpikeReport(s1: String, s2: String): AsyncResponse[String] =
     canWithstandSurge(s1, s2).transform {
       case Left(failure) => Left(failure)
-      case Right(b) => if (b) Right("Server request") else Right("Hold request")
+      case Right(false) => Left("Hold request")
+      case Right(true) => Right("Server request")
     }
 
   def main(args: Array[String]): Unit = {
