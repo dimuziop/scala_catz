@@ -31,7 +31,8 @@ object MonadTransformers {
   val listOfEithers: EitherT[List, String, Int] = EitherT(List(Left("Something went wrong"), Right(43), Right(2)))
 
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
-  //val futureOfEither: EitherT[Future, String, Int] = EitherT(Future(Right(45)))
+  val futureOfEither: EitherT[Future, String, Int] = EitherT(Future[Either[String, Int]](Right(45)))
+  val futureOfEitherCons: EitherT[Future, String, Int] = EitherT.right(Future(45))
 
   /*
   TODO exercise
@@ -76,6 +77,7 @@ object MonadTransformers {
     println(listOfTuples.value)
     canWithstandSurge(bandwidths.head._1, bandwidths.head._1).value.map(println)
     generateTrafficSpikeReport(bandwidths.head._1, bandwidths.head._1).value.map(println)
+    generateTrafficSpikeReport(bandwidths.tail.head._1, bandwidths.head._1).value.map(println)
   }
 
 
