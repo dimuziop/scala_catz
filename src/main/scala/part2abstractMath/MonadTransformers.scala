@@ -31,7 +31,7 @@ object MonadTransformers {
   val listOfEithers: EitherT[List, String, Int] = EitherT(List(Left("Something went wrong"), Right(43), Right(2)))
 
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
-  val futureOfEither: EitherT[Future, String, Int] = EitherT(Future(Right(45)))
+  //val futureOfEither: EitherT[Future, String, Int] = EitherT(Future(Right(45)))
 
   /*
   TODO exercise
@@ -55,15 +55,26 @@ object MonadTransformers {
   // TODO 1
   // hint: call getBandwidth twice, and combine the results
 
-  def canWithstandSurge(s1: String, s2: String): AsyncResponse[Boolean] = ???
+  def canWithstandSurge(s1: String, s2: String): AsyncResponse[Boolean] =
+    for {
+      srv1 <- getBandwidth(s1)
+      srv2 <- getBandwidth(s2)
+    } yield (srv1 + srv2) > 250
+
   // Future[Either[String, Boolean]]
 
   // TODO 2
   // hint: call canWithstandSurge + transform
-  def generateTrafficSpikeReport(s1: String, s2: String): AsyncResponse[String] = ???
+  def generateTrafficSpikeReport(s1: String, s2: String): AsyncResponse[String] =
+    canWithstandSurge(s1, s2).transform {
+      case Left(failure) => Left(failure)
+      case Right(b) => if (b) Right("Server request") else Right("Hold request")
+    }
 
   def main(args: Array[String]): Unit = {
     println(listOfTuples.value)
+    canWithstandSurge(bandwidths.head._1, bandwidths.head._1).value.map(println)
+    generateTrafficSpikeReport(bandwidths.head._1, bandwidths.head._1).value.map(println)
   }
 
 
