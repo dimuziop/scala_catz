@@ -77,6 +77,20 @@ object Readers {
     ).run(config)
   }
 
+  // daniel Solution
+  def emailUserDaniel(username: String, userEmail: String): String = {
+    // fetch the status of their last order
+    // email them with the Email service: "Your last order has the status: (status)"
+    val emailServiceReader: Reader[Configuration, EmailService] = Reader(conf => EmailService(conf.email))
+    val emailReader: Reader[Configuration, String] = for {
+      lastOrderId <- dbReader.map(_.getLastOrderId(username))
+      orderStatus <- dbReader.map(_.getOrderStatus(lastOrderId))
+      emailService <- emailServiceReader
+    } yield emailService.sendEmail(userEmail, s"Your last order has the status: $orderStatus")
+
+    emailReader.run(config)
+  }
+
   def main(args: Array[String]): Unit = {
     println(getLastOrderStatus("me"))
     println(emailUser("me", "me@me.me"))
