@@ -1,6 +1,8 @@
 package part3dataManipulation
 
+import java.util.concurrent.Executors
 import scala.annotation.tailrec
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * User: pat
@@ -86,13 +88,26 @@ object Writers {
     }
   }
 
+  def naiveSumFP(n: Int): Writer[Vector[String], Int] = {
+    if (n <= 0) Writer(Vector(s"Now at $n"), 0)
+    else for {
+      _ <- Writer(Vector(s"Now at $n"), n)
+      lowerSum <- naiveSumFP(n - 1)
+      _ <- Writer(Vector(s"Computed sum(${n - 1}) = $lowerSum"), n)
+    } yield lowerSum + n
+  }
 
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
 
   def main(args: Array[String]): Unit = {
 
     println(compositeWriter.run)
     println(countAndSay(5))
     countAndLogSolution(5).written.foreach(println)
+    println(naiveSumFP(5).run)
+
+    Future(naiveSumFP(100)).foreach(println)
+    Future(naiveSumFP(100)).foreach(println)
 
   }
 
