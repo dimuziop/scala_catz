@@ -1,5 +1,7 @@
 package part3dataManipulation
 
+import scala.annotation.tailrec
+
 /**
  * User: pat
  * Date: 10/1/22
@@ -51,12 +53,26 @@ object Writers {
     }
   }
 
-  def countAndLog(n: Int): Writer[Vector[String], Int] = ???
+  def countAndLog(n: Int): Writer[Vector[String], Int] = {
+    val writer = Writer(Vector("Starting"), n)
+    @tailrec
+    def innerFunction(writter: Writer[Vector[String], Int], int: Int):  Writer[Vector[String], Int] = {
+      if (int == 0) writter
+      else {
+        writter.map(_ - 1)
+        innerFunction(writter, int - 1)
+      }
+    }
+    innerFunction(writer, n)
+
+  }
 
 
   def main(args: Array[String]): Unit = {
 
     println(compositeWriter.run)
+    println(countAndSay(5))
+    println(countAndLog(5).run)
 
   }
 
