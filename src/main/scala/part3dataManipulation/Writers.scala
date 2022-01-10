@@ -55,24 +55,44 @@ object Writers {
 
   def countAndLog(n: Int): Writer[Vector[String], Int] = {
     val writer = Writer(Vector("Starting"), n)
+
     @tailrec
-    def innerFunction(writter: Writer[Vector[String], Int], int: Int):  Writer[Vector[String], Int] = {
+    def innerFunction(writter: Writer[Vector[String], Int], int: Int): Writer[Vector[String], Int] = {
       if (int == 0) writter
       else {
         writter.map(_ - 1)
         innerFunction(writter, int - 1)
       }
     }
+
     innerFunction(writer, n)
 
   }
+
+  def countAndLogSolution(n: Int): Writer[Vector[String], Int] = {
+    if (n <= 0) Writer(Vector("Starting!"), 0)
+    else countAndLogSolution(n - 1).flatMap(_ => Writer(Vector(s"$n"), n))
+  }
+  // Benefit #1: we work as pure FP
+
+  // TODO 2: rewrite this method with writers
+  def naiveSum(n: Int): Int = {
+    if (n <= 0) 0
+    else {
+      println(s"Now at $n")
+      val lowerSum = naiveSum(n - 1)
+      println(s"Computed sum(${n - 1}) = $lowerSum")
+      lowerSum + n
+    }
+  }
+
 
 
   def main(args: Array[String]): Unit = {
 
     println(compositeWriter.run)
     println(countAndSay(5))
-    println(countAndLog(5).run)
+    countAndLogSolution(5).written.foreach(println)
 
   }
 
