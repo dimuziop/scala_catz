@@ -69,6 +69,15 @@ object Evaluation {
   def defer[T](eval: => Eval[T]): Eval[T] =
     Eval.later(()).flatMap(_ => eval)
 
+  // TODO 3: rewrite the method with Eval
+  def reverseList[T](list: List[T]): List[T] =
+    if (list.isEmpty) list
+    else reverseList(list.tail) :+ list.head
+
+  def reverseEval[T](list: List[T]): Eval[List[T]] =
+    if (list.isEmpty) Eval.later(list)
+    else Eval.later(reverseEval(list.tail).value :+ list.head)
+
   def main(args: Array[String]): Unit = {
     /*println(instantEval.value)
     println(redoEval.value)
@@ -82,7 +91,7 @@ object Evaluation {
     println(dontRecompute.value)
     println(dontRecompute.value)
     println(tutorial.value)
-    println(tutorial.value)*/
+    println(tutorial.value)
     defer(Eval.now {
       println("Now!")
       42
@@ -90,7 +99,8 @@ object Evaluation {
     println(defer(Eval.now {
       println("Now!")
       42
-    }).value)
+    }).value)*/
+    println(reverseEval(List(1,2,3,5)).value)
   }
 
 }
