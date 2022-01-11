@@ -75,8 +75,9 @@ object Evaluation {
     else reverseList(list.tail) :+ list.head
 
   def reverseEval[T](list: List[T]): Eval[List[T]] =
-    if (list.isEmpty) Eval.later(list)
-    else Eval.later(reverseEval(list.tail).value :+ list.head)
+    if (list.isEmpty) Eval.now(list)
+    //else Eval.later(reverseEval(list.tail).value :+ list.head)
+    else Eval.defer(reverseEval(list.tail).map(_ :+ list.head))
 
   def main(args: Array[String]): Unit = {
     /*println(instantEval.value)
@@ -100,7 +101,7 @@ object Evaluation {
       println("Now!")
       42
     }).value)*/
-    println(reverseEval(List(1,2,3,5)).value)
+    println(reverseEval((1 to 100000).toList).value)
   }
 
 }
