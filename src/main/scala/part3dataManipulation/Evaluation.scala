@@ -46,6 +46,29 @@ object Evaluation {
     d <- redoEval
   } yield a + b + c + d
 
+  /* remember */
+  val dontRecompute: Eval[Int] = redoEval.memoize
+
+  val tutorial = Eval
+    .always {
+      println("Step 1 ....")
+      "Put the guitar on your lap"
+    }
+    .map {
+      step1 =>
+        println("Step 2 ....")
+        s"$step1 the put your left hand on the neck"
+    }.memoize
+    .map {
+      steps12 =>
+        println("Step 3, more complicated")
+        s"$steps12 then with right hand strike the strings"
+    }
+
+  // TODO 2: implement defer such the defer(Eval.now) does NOT run the side effects
+  def defer[T](eval: => Eval[T]): Eval[T] =
+    Eval.later(()).flatMap(_ => eval)
+
   def main(args: Array[String]): Unit = {
     /*println(instantEval.value)
     println(redoEval.value)
@@ -53,10 +76,21 @@ object Evaluation {
     println(delayedEval.value)
     println(delayedEval.value)
     println(composedEvaluation.value)
-    println(composedEvaluation.value) */
+    println(composedEvaluation.value)
     println(evalEx1.value)
     println(evalEx1.value)
-
+    println(dontRecompute.value)
+    println(dontRecompute.value)
+    println(tutorial.value)
+    println(tutorial.value)*/
+    defer(Eval.now {
+      println("Now!")
+      42
+    })
+    println(defer(Eval.now {
+      println("Now!")
+      42
+    }).value)
   }
 
 }
