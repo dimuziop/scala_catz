@@ -50,9 +50,26 @@ object FunctionalState {
   def addToCart(item: String, price: Double): State[ShoppingCart, Double] = State { s =>
     val total = s.total + price
     (ShoppingCart(s.items :+ item,  total), total)
+    //(ShoppingCart(item :: s.items,  total), total)
   }
 
   val myCart = ShoppingCart(List("product1", "product2", "product3"), 58.3)
+
+  val danielsCart: State[ShoppingCart, Double] = for {
+    _ <- addToCart("Fender guitar", 500)
+    _ <- addToCart("Elixir strings", 19)
+    total <- addToCart("Electric cable", 8)
+  } yield total
+
+  // TODO 2: pure mental gymnastics
+  // returns a State data structure that, when run, will not change the state but will issue the value f(a)
+  def inspect[A, B](f: A => B): State[A, B] = State(state => (state, f(state)))
+  // returns a State data structure that, when run, returns the value of that state and makes no changes
+  def get[A]: State[A, A] = State(s => (s, s))
+  // returns a State data structure that, when run, returns Unit and sets the state to that value
+  def set[A](value: A): State[A, Unit] = State(s => (value, Unit))
+  // returns a State data structure that, when run, will return Unit and sets the state to f(state)
+  def modify[A](f: A => A): State[A, Unit] = State(s => (f(s), Unit))
 
 
 
