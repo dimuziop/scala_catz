@@ -45,7 +45,14 @@ object FunctionalState {
     case (newState, firstResult) => (firstResult, func2(newState))
   }
 
+  // TODO 1: an online store
+  case class ShoppingCart(items: List[String], total: Double)
+  def addToCart(item: String, price: Double): State[ShoppingCart, Double] = State { s =>
+    val total = s.total + price
+    (ShoppingCart(s.items :+ item,  total), total)
+  }
 
+  val myCart = ShoppingCart(List("product1", "product2", "product3"), 58.3)
 
 
 
@@ -53,7 +60,7 @@ object FunctionalState {
   def main(args: Array[String]): Unit = {
     println(compositeTransformation.run(10).value)
     println(compositeTransformation2.run(10).value)
-    println()
+    println(addToCart("Item 4", 75).run(myCart).value)
   }
 
 }
