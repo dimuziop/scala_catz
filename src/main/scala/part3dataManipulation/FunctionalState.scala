@@ -67,11 +67,19 @@ object FunctionalState {
   // returns a State data structure that, when run, returns the value of that state and makes no changes
   def get[A]: State[A, A] = State(s => (s, s))
   // returns a State data structure that, when run, returns Unit and sets the state to that value
-  def set[A](value: A): State[A, Unit] = State(s => (value, Unit))
+  def set[A](value: A): State[A, Unit] = State(_ => (value, ()))
   // returns a State data structure that, when run, will return Unit and sets the state to f(state)
-  def modify[A](f: A => A): State[A, Unit] = State(s => (f(s), Unit))
+  def modify[A](f: A => A): State[A, Unit] = State(s => (f(s), ()))
 
-
+  // methods available
+  import cats.data.State._
+  val program: State[Int, (Int, Int, Int)] = for {
+    a <- get[Int]
+    _ <- set[Int](a + 10)
+    b <- get[Int]
+    _ <- modify[Int](_ + 43)
+    c <- inspect[Int, Int](_ * 2)
+  } yield (a, b, c)
 
 
   def main(args: Array[String]): Unit = {
