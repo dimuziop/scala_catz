@@ -89,8 +89,24 @@ object DataValidation {
 
   // TODO 2
   object FormValidation {
-    import cats.instances.string._
+    //import cats.instances.string._
+    implicit val combineIntMax: Semigroup[String] = Semigroup.instance[String]{(prev, post) => s"$prev | $post"}
+
     type FormValidation[T] = Validated[List[String], T]
+
+    def validateName(name: String): FormValidation[String] =
+      Validated.cond(!name.isBlank, name, List("Name mustn't be blank"))
+
+    def validateEmail(email: String): FormValidation[String] =
+      Validated.cond(email.contains('@'), email, List("Invalid email"))
+
+    def validatePassword(password: String): FormValidation[String] =
+      Validated.cond(password.length >= 10, password, List("Password must be longer than 9"))
+
+    def validateKeyPresence[T](map: Map[String, T], key: String): Validated[List[String], T] =
+      Validated.fromOption(map.get(key), List(s"$key must be present"))
+
+
     /*
       fields are
       - name
@@ -102,12 +118,21 @@ object DataValidation {
       - email must have "@"
       - password must have >= 10 characters
      */
-    def validateForm(form: Map[String, String]): FormValidation[String] = ???
+
+    def validateForm(form: Map[String, String]): FormValidation[String] =
+      validateKeyPresence(form, "name")
+        .andThen(validateName)
+        .combine(validateKeyPresence(form, "email"))
+        .andThen(validateEmail)
+        .combine(validateKeyPresence(form, "password"))
+        .andThen(validateEmail)
   }
 
 
   def main(args: Array[String]): Unit = {
-    println(testNumber(0))
+    println(FormValidation.validateForm(Map("name" -> "Oscar", "email" -> "oscar@delahoya.com", "password" -> "12345678910")))
+    println(FormValidation.validateForm(Map("name" -> "Oscar", "email" -> "oscardelahoya.com", "password" -> "178910")))
+    println(FormValidation.validateForm(Map("email" -> "oscar@delahoya.com", "password" -> "12345678910")))
     println(testNumber(-5))
     println(testNumber(100))
     println(testNumber(101))
