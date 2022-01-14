@@ -3,6 +3,7 @@ package part3dataManipulation
 import cats.kernel.Semigroup
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 /**
  * User: pat
@@ -68,6 +69,41 @@ object DataValidation {
       .combine(Validated.cond(n >= 0, n, List("Number must be non-negative")))
       .combine(Validated.cond(n <= 100, n, List("Number must be less than or equal to 100")))
       .combine(Validated.cond(isPrime(n), n, List("Number must be a prime")))
+
+  // chain
+  aValidValue.andThen(_ => anInvalidValue)
+  // test
+  aValidValue.ensure(List("something went wrong"))(_ % 2 == 0)
+  // transform
+  aValidValue.map(_ + 1)
+  aValidValue.leftMap(_.length)
+  aValidValue.bimap(_.length, _ + 1)
+  // interoperate with stdlib
+  val eitherToValidated: Validated[List[String], Int] = Validated.fromEither(Right(42))
+  val optionToValidated: Validated[List[String], Int] = Validated.fromOption(None, List("Nothing Present"))
+  val tryToValidated: Validated[Throwable, Int] = Validated.fromTry(Try("somthing".toInt))
+
+  //backwards
+  aValidValue.toOption
+  aValidValue.toEither
+
+  // TODO 2
+  object FormValidation {
+    import cats.instances.string._
+    type FormValidation[T] = Validated[List[String], T]
+    /*
+      fields are
+      - name
+      - email
+      - password
+      rules are
+      - name, email and password MUST be specified
+      - name must not be blank
+      - email must have "@"
+      - password must have >= 10 characters
+     */
+    def validateForm(form: Map[String, String]): FormValidation[String] = ???
+  }
 
 
   def main(args: Array[String]): Unit = {
