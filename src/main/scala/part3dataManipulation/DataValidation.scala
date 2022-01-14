@@ -125,7 +125,7 @@ object DataValidation {
         .combine(validateKeyPresence(form, "email"))
         .andThen(validateEmail)
         .combine(validateKeyPresence(form, "password"))
-        .andThen(validateEmail)
+        .andThen(validateEmail).map(_ => "User Registration Complete")
   }
 
 
