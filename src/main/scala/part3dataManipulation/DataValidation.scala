@@ -1,5 +1,7 @@
 package part3dataManipulation
 
+import cats.kernel.Semigroup
+
 import scala.annotation.tailrec
 
 /**
@@ -43,11 +45,29 @@ object DataValidation {
       if (n <= 100) nonNegative.fold(errList => Left(errList), _ => Right(n))
       else nonNegative.fold(errList => Left(errList :+ "Must be less than 100"), _ => Right(n))
     val even =
-      if (n % 2 == 0) up100.fold(errList => Left(errList), _ => Right(n))
+      if (n % 2 != 0) up100.fold(errList => Left(errList), _ => Right(n))
       else up100.fold(errList => Left(errList :+ "Must be even"), _ => Right(n))
 
     even
   }
+  def testNumberDaniel(n: Int): Either[List[String], Int] = {
+    val isNotEven: List[String] = if (n % 2 == 0) List() else List("Number must be even")
+    val isNegative: List[String] = if (n >= 0) List() else List("Number must be non-negative")
+    val isToBig: List[String] = if (n <= 100) List() else List("Number must be less than or equal to 100")
+    val isNotPrime: List[String] = if (isPrime(n)) List() else List("Number must be a prime")
+
+    if (n % 2 == 0 && n >= 0 && n <= 100 && isPrime(n)) Right(n)
+    else Left(isNotEven ++ isNegative ++ isToBig ++ isNotPrime)
+  }
+
+  import cats.instances.list._
+  implicit val combineIntMax: Semigroup[Int] = Semigroup.instance[Int](Math.max)
+
+  def validateNumber(n: Int): Validated[List[String], Int] =
+    Validated.cond(n % 2 == 0, n ,List("Number must be even"))
+      .combine(Validated.cond(n >= 0, n, List("Number must be non-negative")))
+      .combine(Validated.cond(n <= 100, n, List("Number must be less than or equal to 100")))
+      .combine(Validated.cond(isPrime(n), n, List("Number must be a prime")))
 
 
   def main(args: Array[String]): Unit = {
@@ -59,6 +79,7 @@ object DataValidation {
     println(testNumber(17))
     println(testNumber(21))
     println(testNumber(13))
+    println(validateNumber(13))
   }
 
 }
