@@ -128,6 +128,10 @@ object DataValidation {
         .andThen(validateEmail).map(_ => "User Registration Complete")
   }
 
+  import cats.syntax.validated._
+  val aValidMeaningOfLife: Validated[List[String], Int] = 42.valid[List[String]]
+  val anError:Validated[String, Int] = "Something went wrong".invalid[Int]
+
 
   def main(args: Array[String]): Unit = {
     println(FormValidation.validateForm(Map("name" -> "Oscar", "email" -> "oscar@delahoya.com", "password" -> "12345678910")))
