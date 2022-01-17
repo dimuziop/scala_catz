@@ -61,7 +61,9 @@ object Semigroupals {
   // Associativity: m.flatMap(f).flatMap(g) == m.flatMap(x => f(x).flatMap(g))
 
   // TODO 2: define a Semigroupal[List] which does a zip
-  val zipListSemigroupal: Semigroupal[List] =
+  val zipListSemigroupal: Semigroupal[List] = new Semigroupal[List] {
+    override def product[A, B](fa: List[A], fb: List[B]): List[(A, B)] = fa.zip(fb)
+  }
 
   def main(args: Array[String]): Unit = {
     println(aTupledList)
