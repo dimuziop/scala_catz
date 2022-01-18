@@ -1,7 +1,5 @@
 package part3dataManipulation
 
-import cats.Monoid
-
 /**
  * User: pat
  * Date: 18/1/22
@@ -35,8 +33,13 @@ object Applicatives {
 
 
   // TODO: though experiment
-  def productWithApplicatives[W[_], A, B](wa: W[A], wb: W[B])(implicit applicative: Applicative[W]): W[(A, B)] =
-    applicative.map(wa)(a => applicative.map(wb)(b => (a, b)))
+  def ap[W[_], A, B](wf: W[A => B])(wa: W[A]): W[B] = ???
+  def productWithApplicatives[W[_], A, B](wa: W[A], wb: W[B])(implicit applicative: Applicative[W]): W[(A, B)] = {
+    val functionWrapper: W[B => (A,B)] = applicative.map(wa)(a => (b: B) => (a,b))
+    ap(functionWrapper)(wb)
+  }
+  //  ap(a => applicative.map(wb)(b => (a, b)))(wa)
+  //applicative.map(wa)(a => applicative.map(wb)(b => (a, b)))
 
   def main(args: Array[String]): Unit = {
 
